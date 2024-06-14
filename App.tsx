@@ -1,117 +1,201 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
-
-import React from 'react';
-import type {PropsWithChildren} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
   StyleSheet,
+  TextInput,
   Text,
-  useColorScheme,
   View,
+  TouchableOpacity,
 } from 'react-native';
+import {colors} from './app/res/colors';
+import {strings} from './app/res/strings';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+const App = () => {
+  const [seconds, setSeconds] = useState(0);
+  const [remainingSeconds, setRemainingSeconds] = useState(0);
+  const [isRunning, setIsRunning] = useState(false);
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
+  useEffect(() => {
+    if (isRunning) {
+      const intervalId = setInterval(() => {
+        setRemainingSeconds(prev => Math.max(0, prev - 1));
+      }, 1000);
 
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-}
+      return () => clearInterval(intervalId);
+    }
+  }, [isRunning]);
 
-function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+  const startButtonStyle = {
+    ...style.button,
+    backgroundColor: colors.green,
+  };
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+  const startButtonDisabledStyle = {
+    ...style.disabledButton,
+    backgroundColor: colors.green,
+  };
+
+  const stopButtonStyle = {
+    ...style.button,
+    backgroundColor: colors.red,
+  };
+
+  const stopButtonDisabledStyle = {
+    ...style.disabledButton,
+    backgroundColor: colors.red,
+  };
+
+  const onStart = () => {
+    setIsRunning(true);
+    setRemainingSeconds(seconds);
+  };
+
+  const onStop = () => {
+    setIsRunning(false);
+  };
+
+  const onReset = () => {
+    setIsRunning(false);
+    setRemainingSeconds(0);
+  };
+
+  const onTextChange = (text: string) => {
+    setSeconds(parseInt(text) || 0);
+  };
+
+  const formatTime = (seconds: number) => {
+    if (seconds < 0) {
+      seconds = -seconds;
+    }
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const remainingSeconds = seconds % 60;
+
+    const formattedHours = hours.toString().padStart(2, '0');
+    const formattedMinutes = minutes.toString().padStart(2, '0');
+    const formattedSeconds = remainingSeconds.toString().padStart(2, '0');
+
+    return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
   };
 
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+    <View style={style.mainContainer}>
+      <View style={style.textInputContainer}>
+        <Text style={style.textInputTitle}>{strings.timerTitle}</Text>
+        <TextInput
+          value={seconds.toString()}
+          onChangeText={onTextChange}
+          keyboardType="numeric"
+          style={style.textInput}
+        />
+      </View>
+      <View style={style.timerContainer}>
+        <Text style={style.timerText}>{formatTime(remainingSeconds)}</Text>
+      </View>
+      <View style={style.buttonContainer}>
+        {
+          // !isRunning && (
+          <TouchableOpacity
+            style={isRunning ? startButtonDisabledStyle : startButtonStyle}
+            onPress={onStart}
+            disabled={isRunning}>
+            <Text style={style.buttonText}>{strings.start}</Text>
+          </TouchableOpacity>
+          // )
+        }
+        {
+          // isRunning && (
+          <TouchableOpacity
+            style={!isRunning ? stopButtonDisabledStyle : stopButtonStyle}
+            onPress={onStop}
+            disabled={!isRunning}>
+            <Text style={style.buttonText}>{strings.stop}</Text>
+          </TouchableOpacity>
+          // )
+        }
+        <TouchableOpacity style={style.button} onPress={onReset}>
+          <Text style={style.buttonText}>{strings.reset}</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
   );
-}
+};
 
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
+const style = StyleSheet.create({
+  mainContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: colors.white,
+    padding: 10,
   },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
+  textInputContainer: {
+    margin: 30,
+    justifyContent: 'center',
+    marginBottom: 10,
   },
-  sectionDescription: {
-    marginTop: 8,
+  textInputTitle: {
     fontSize: 18,
-    fontWeight: '400',
+    color: colors.black,
   },
-  highlight: {
-    fontWeight: '700',
+  textInput: {
+    fontSize: 20,
+    borderColor: colors.black,
+    textAlign: 'center',
+    borderWidth: 2,
+    color: colors.black,
+    margin: 10,
+    paddingHorizontal: 5,
+    borderRadius: 10,
+  },
+  timerContainer: {
+    margin: 30,
+    height: 200,
+    width: 200,
+    borderColor: colors.black,
+    borderWidth: 2,
+    borderRadius: 100,
+    textAlign: 'center',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  timerText: {
+    fontSize: 34,
+    color: colors.black,
+    textAlign: 'center',
+  },
+  buttonContainer: {
+    margin: 10,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+  },
+  button: {
+    height: 100,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 50,
+    paddingHorizontal: 20,
+    paddingVertical: 5,
+    aspectRatio: '1',
+    borderColor: colors.black,
+    backgroundColor: colors.yellow,
+  },
+  disabledButton: {
+    height: 100,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 50,
+    paddingHorizontal: 20,
+    paddingVertical: 5,
+    opacity: 0.5,
+    marginHorizontal: 10,
+    aspectRatio: '1',
+    borderColor: colors.black,
+    backgroundColor: 'red',
+  },
+  buttonText: {
+    fontSize: 23,
+    color: colors.white,
+    textAlign: 'center',
   },
 });
 
