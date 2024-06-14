@@ -1,13 +1,8 @@
 import React, {useState, useEffect} from 'react';
-import {
-  StyleSheet,
-  TextInput,
-  Text,
-  View,
-  TouchableOpacity,
-} from 'react-native';
+import {StyleSheet, TextInput, Text, View} from 'react-native';
 import {colors} from './app/res/colors';
 import {strings} from './app/res/strings';
+import RoundButton from './app/src/components/RoundButton';
 
 const App = () => {
   const [seconds, setSeconds] = useState(0);
@@ -23,26 +18,6 @@ const App = () => {
       return () => clearInterval(intervalId);
     }
   }, [isRunning]);
-
-  const startButtonStyle = {
-    ...style.button,
-    backgroundColor: colors.green,
-  };
-
-  const startButtonDisabledStyle = {
-    ...style.disabledButton,
-    backgroundColor: colors.green,
-  };
-
-  const stopButtonStyle = {
-    ...style.button,
-    backgroundColor: colors.red,
-  };
-
-  const stopButtonDisabledStyle = {
-    ...style.disabledButton,
-    backgroundColor: colors.red,
-  };
 
   const onStart = () => {
     setIsRunning(true);
@@ -92,29 +67,19 @@ const App = () => {
         <Text style={style.timerText}>{formatTime(remainingSeconds)}</Text>
       </View>
       <View style={style.buttonContainer}>
-        {
-          // !isRunning && (
-          <TouchableOpacity
-            style={isRunning ? startButtonDisabledStyle : startButtonStyle}
-            onPress={onStart}
-            disabled={isRunning}>
-            <Text style={style.buttonText}>{strings.start}</Text>
-          </TouchableOpacity>
-          // )
-        }
-        {
-          // isRunning && (
-          <TouchableOpacity
-            style={!isRunning ? stopButtonDisabledStyle : stopButtonStyle}
-            onPress={onStop}
-            disabled={!isRunning}>
-            <Text style={style.buttonText}>{strings.stop}</Text>
-          </TouchableOpacity>
-          // )
-        }
-        <TouchableOpacity style={style.button} onPress={onReset}>
-          <Text style={style.buttonText}>{strings.reset}</Text>
-        </TouchableOpacity>
+        <RoundButton
+          title={strings.start}
+          onPress={onStart}
+          isDisabled={isRunning}
+          style={{backgroundColor: colors.green}}
+        />
+        <RoundButton
+          title={strings.stop}
+          onPress={onStop}
+          isDisabled={!isRunning}
+          style={{backgroundColor: colors.red}}
+        />
+        <RoundButton title={strings.reset} onPress={onReset} />
       </View>
     </View>
   );
@@ -167,30 +132,6 @@ const style = StyleSheet.create({
     margin: 10,
     flexDirection: 'row',
     justifyContent: 'space-around',
-  },
-  button: {
-    height: 100,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 50,
-    paddingHorizontal: 20,
-    paddingVertical: 5,
-    aspectRatio: '1',
-    borderColor: colors.black,
-    backgroundColor: colors.yellow,
-  },
-  disabledButton: {
-    height: 100,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 50,
-    paddingHorizontal: 20,
-    paddingVertical: 5,
-    opacity: 0.5,
-    marginHorizontal: 10,
-    aspectRatio: '1',
-    borderColor: colors.black,
-    backgroundColor: 'red',
   },
   buttonText: {
     fontSize: 23,
