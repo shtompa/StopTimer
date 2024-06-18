@@ -45,11 +45,11 @@ class App extends React.Component {
     this.setState({isRunning: false, remainingSeconds: 0});
   };
 
-  onTextChange = (text: string) => {
+  onTextChange = text => {
     this.setState({seconds: parseInt(text) || 0});
   };
 
-  formatTime = (seconds: number) => {
+  formatTime = seconds => {
     if (seconds < 0) {
       seconds = -seconds;
     }
